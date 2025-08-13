@@ -1,17 +1,28 @@
+# config/urls.py
 from django.contrib import admin
 from django.urls import path, include
-from drf_spectacular.views import SpectacularAPIView, SpectacularSwaggerView
+from apps.accounts.views import DentistLoginView, root_redirect
+from apps.accounts import urls as accounts_urls
 
 urlpatterns = [
+    # 👇 raíz: si está logueado -> /dashboard/, si no -> /login/
+    path("", root_redirect, name="root"),
+
+    # Admin usando tu login
+    path("admin/login/", DentistLoginView.as_view(), name="admin_login"),
     path("admin/", admin.site.urls),
 
-    # Schema & docs
-    path("api/schema/", SpectacularAPIView.as_view(), name="schema"),
-    path("api/docs/", SpectacularSwaggerView.as_view(url_name="schema"), name="swagger-ui"),
+    # WEB (login, logout, register, reset...) con namespace "accounts"
+    path("", include((accounts_urls.webpatterns, "accounts"), namespace="accounts")),
 
-    # Apps
-    path("api/accounts/", include("apps.accounts.urls")),
-    path("api/patients/", include("apps.patients.urls")),
-    path("api/services/", include("apps.services.urls")),
-    path("api/appointments/", include("apps.appointments.urls")),
+    # API JWT debajo de /api/accounts/ con su propio namespace
+    path(
+        "api/accounts/",
+        include((accounts_urls.apipatterns, "accounts_api"), namespace="accounts_api"),
+    ),
+
+    # Otras APIs si aplica:
+    # path("api/patients/", include("apps.patients.urls")),
+    # path("api/services/", include("apps.services.urls")),
+    # path("api/appointments/", include("apps.appointments.urls")),
 ]

@@ -1,0 +1,54 @@
+{% load static %}
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <title>Iniciar sesión | Dentista</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link href="{% static 'css/base.css' %}" rel="stylesheet">
+  <link href="{% static 'css/auth.css' %}" rel="stylesheet">
+</head>
+<body class="auth-wrap">
+  <main class="auth-card">
+    <h1 class="auth-title">Acceso del dentista</h1>
+
+    {% if form.non_field_errors %}
+      <div class="alert error">{{ form.non_field_errors }}</div>
+    {% endif %}
+
+    <form method="post" action="{% url 'accounts:login' %}" novalidate>
+      {% csrf_token %}
+      <div style="display:grid;gap:12px">
+        <div>
+          <label class="muted" for="{{ form.username.id_for_label }}">Email o usuario</label>
+          {{ form.username }}
+          {% if form.username.errors %}
+            <div class="alert error">{{ form.username.errors.0 }}</div>
+          {% endif %}
+        </div>
+
+        <div>
+          <label class="muted" for="{{ form.password.id_for_label }}">Contraseña</label>
+          {{ form.password }}
+          {% if form.password.errors %}
+            <div class="alert error">{{ form.password.errors.0 }}</div>
+          {% endif %}
+        </div>
+
+        <button class="btn block" type="submit">Entrar</button>
+      </div>
+
+      <div class="auth-links">
+        <a class="muted" href="{% url 'accounts:password_reset' %}">¿Olvidaste tu contraseña?</a>
+        <a class="muted" href="{% url 'accounts:register' %}">Registrar dentista</a>
+      </div>
+    </form>
+
+    <div class="auth-providers">
+      <a class="auth-ico" href="#" aria-label="Google">G</a>
+      <a class="auth-ico" href="#" aria-label="Facebook">f</a>
+      <a class="auth-ico" href="#" aria-label="Twitter">t</a>
+    </div>
+  </main>
+</body>
+</html>

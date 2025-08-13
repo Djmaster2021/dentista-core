@@ -49,6 +49,7 @@ ROOT_URLCONF = "config.urls"
 TEMPLATES = [
     {
         "BACKEND": "django.template.backends.django.DjangoTemplates",
+        # ⬇️ muy importante: añade la carpeta /templates de la raíz
         "DIRS": [BASE_DIR / "templates"],
         "APP_DIRS": True,
         "OPTIONS": {
@@ -62,8 +63,10 @@ TEMPLATES = [
     },
 ]
 
-WSGI_APPLICATION = "config.wsgi.application"
-ASGI_APPLICATION = "config.asgi.application"
+LOGIN_URL = "/login/"
+LOGIN_REDIRECT_URL = "/admin/"   # luego lo cambiamos a tu dashboard
+LOGOUT_REDIRECT_URL = "/login/"
+
 
 # Base de datos: override en dev/prod
 DATABASES = {
@@ -76,6 +79,10 @@ DATABASES = {
 # Usuario personalizado
 AUTH_USER_MODEL = "accounts.User"
 
+AUTHENTICATION_BACKENDS = [
+    "apps.accounts.backends.EmailOrUsernameBackend",   # nuestro backend
+    "django.contrib.auth.backends.ModelBackend",       # respaldo
+]
 
 # Passwords y auth
 AUTH_PASSWORD_VALIDATORS = [
