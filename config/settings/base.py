@@ -1,15 +1,14 @@
 from pathlib import Path
-from datetime import timedelta
 import os
 
-BASE_DIR = Path(__file__).resolve().parent.parent.parent
+BASE_DIR = Path(__file__).resolve().parent.parent.parent  # raíz del repo: dentista-core
 
-SECRET_KEY = os.getenv("SECRET_KEY", "dev-insecure-key")  # override en prod
-DEBUG = False  # override en dev/prod
+# ── seguridad / debug (si ya lo tienes con dotenv, respétalo)
+SECRET_KEY = os.getenv("DJANGO_SECRET_KEY", "dev-key")
+DEBUG = os.getenv("DJANGO_DEBUG", "True") == "True"
 
-ALLOWED_HOSTS = []  # override en dev/prod
+ALLOWED_HOSTS = [h.strip() for h in os.getenv("ALLOWED_HOSTS", "127.0.0.1,localhost").split(",")]
 
-# Apps
 INSTALLED_APPS = [
     "django.contrib.admin",
     "django.contrib.auth",
@@ -18,25 +17,23 @@ INSTALLED_APPS = [
     "django.contrib.messages",
     "django.contrib.staticfiles",
 
-    # 3rd party
+    # terceros
     "rest_framework",
-    "drf_spectacular",
     "corsheaders",
 
-    # Local apps
+    # apps propias
     "apps.accounts",
     "apps.patients",
-    "apps.services",
     "apps.appointments",
-    "apps.legacy",
-
+    "apps.services",
+    "apps.payments",      # ← NUEVA
+    # "apps._archive.legacy",  # ← ARCHIVADA: NO la incluyas
 ]
 
 MIDDLEWARE = [
-    "django.middleware.security.SecurityMiddleware",
-    "whitenoise.middleware.WhiteNoiseMiddleware",  # inerte en dev, útil en prod
-    "django.contrib.sessions.middleware.SessionMiddleware",
     "corsheaders.middleware.CorsMiddleware",
+    "django.middleware.security.SecurityMiddleware",
+    "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
@@ -46,88 +43,52 @@ MIDDLEWARE = [
 
 ROOT_URLCONF = "config.urls"
 
-TEMPLATES = [
-    {
-        "BACKEND": "django.template.backends.django.DjangoTemplates",
-        # ⬇️ muy importante: añade la carpeta /templates de la raíz
-        "DIRS": [BASE_DIR / "templates"],
-        "APP_DIRS": True,
-        "OPTIONS": {
-            "context_processors": [
-                "django.template.context_processors.debug",
-                "django.template.context_processors.request",
-                "django.contrib.auth.context_processors.auth",
-                "django.contrib.messages.context_processors.messages",
-            ],
-        },
+TEMPLATES = [{
+    "BACKEND": "django.template.backends.django.DjangoTemplates",
+    "DIRS": [BASE_DIR / "templates"],   # ← carpeta global de templates
+    "APP_DIRS": True,
+    "OPTIONS": {
+        "context_processors": [
+            "django.template.context_processors.debug",
+            "django.template.context_processors.request",
+            "django.contrib.auth.context_processors.auth",
+            "django.contrib.messages.context_processors.messages",
+        ],
     },
-]
+}]
 
-LOGIN_URL = "/login/"
-LOGIN_REDIRECT_URL = "/admin/"   # luego lo cambiamos a tu dashboard
-LOGOUT_REDIRECT_URL = "/login/"
+WSGI_APPLICATION = "config.wsgi.application"
 
-
-# Base de datos: override en dev/prod
+# BD: (en el siguiente paso levantamos MySQL y .env)
 DATABASES = {
     "default": {
-        "ENGINE": "django.db.backends.sqlite3",
-        "NAME": BASE_DIR / "db.sqlite3",
+        "ENGINE": "django.db.backends.mysql",
+        "NAME": os.getenv("DB_NAME", "dentista"),
+        "USER": os.getenv("DB_USER", "dentyx"),
+        "PASSWORD": os.getenv("DB_PASSWORD", "devpass"),
+        "HOST": os.getenv("DB_HOST", "127.0.0.1"),
+        "PORT": os.getenv("DB_PORT", "3306"),
+        "OPTIONS": {"sql_mode": "STRICT_ALL_TABLES"},
     }
 }
 
-# Usuario personalizado
-AUTH_USER_MODEL = "accounts.User"
-
-AUTHENTICATION_BACKENDS = [
-    "apps.accounts.backends.EmailOrUsernameBackend",   # nuestro backend
-    "django.contrib.auth.backends.ModelBackend",       # respaldo
-]
-
-# Passwords y auth
-AUTH_PASSWORD_VALIDATORS = [
-    {"NAME": "django.contrib.auth.password_validation.UserAttributeSimilarityValidator"},
-    {"NAME": "django.contrib.auth.password_validation.MinimumLengthValidator"},
-    {"NAME": "django.contrib.auth.password_validation.CommonPasswordValidator"},
-    {"NAME": "django.contrib.auth.password_validation.NumericPasswordValidator"},
-]
-
-# Internacionalización
 LANGUAGE_CODE = "es-mx"
 TIME_ZONE = "America/Mexico_City"
 USE_I18N = True
 USE_TZ = True
 
-# Static & media
-STATIC_URL = "/static/"
+# Static / Media
+STATIC_URL = "static/"
 STATIC_ROOT = BASE_DIR / "staticfiles"
-STATICFILES_DIRS = [BASE_DIR / "static"] if (BASE_DIR / "static").exists() else []
+STATICFILES_DIRS = [BASE_DIR / "static"]
+
+MEDIA_URL = "media/"
+MEDIA_ROOT = BASE_DIR / "media"
+
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
-# DRF
-REST_FRAMEWORK = {
-    "DEFAULT_AUTHENTICATION_CLASSES": (
-        "rest_framework_simplejwt.authentication.JWTAuthentication",
-    ),
-    "DEFAULT_SCHEMA_CLASS": "drf_spectacular.openapi.AutoSchema",
-}
-
-SPECTACULAR_SETTINGS = {
-    "TITLE": "Dentista API",
-    "DESCRIPTION": "API del consultorio dental",
-    "VERSION": "1.0.0",
-    "SERVE_INCLUDE_SCHEMA": False,
-}
-
-# SimpleJWT
-SIMPLE_JWT = {
-    "ACCESS_TOKEN_LIFETIME": timedelta(minutes=60),
-    "REFRESH_TOKEN_LIFETIME": timedelta(days=7),
-}
-
-# CORS (overrides en dev/prod si hace falta)
-CORS_ALLOW_CREDENTIALS = True
+# CORS (para frontend local si lo usas)
 CORS_ALLOWED_ORIGINS = [
-    "http://localhost:5173",
     "http://127.0.0.1:5173",
+    "http://localhost:5173",
 ]
