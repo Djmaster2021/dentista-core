@@ -1,8 +1,13 @@
-from rest_framework import viewsets, permissions
+from rest_framework.viewsets import ModelViewSet
+from rest_framework.permissions import AllowAny, IsAuthenticated
 from .models import Service
 from .serializers import ServiceSerializer
 
-class ServiceViewSet(viewsets.ModelViewSet):
-    queryset = Service.objects.all()
+class ServiceViewSet(ModelViewSet):
+    queryset = Service.objects.all().order_by("name")
     serializer_class = ServiceSerializer
-    permission_classes = [permissions.IsAuthenticated]
+
+    def get_permissions(self):
+        if self.action in ["list", "retrieve"]:
+            return [AllowAny()]      # GET público
+        return [IsAuthenticated()]   # crear/editar requiere auth

@@ -6,6 +6,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent.parent  # raíz del repo: dent
 # ── seguridad / debug (si ya lo tienes con dotenv, respétalo)
 SECRET_KEY = os.getenv("DJANGO_SECRET_KEY", "dev-key")
 DEBUG = os.getenv("DJANGO_DEBUG", "True") == "True"
+AUTH_USER_MODEL = "accounts.User"
 
 ALLOWED_HOSTS = [h.strip() for h in os.getenv("ALLOWED_HOSTS", "127.0.0.1,localhost").split(",")]
 
@@ -70,6 +71,28 @@ DATABASES = {
         "PORT": os.getenv("DB_PORT", "3306"),
         "OPTIONS": {"sql_mode": "STRICT_ALL_TABLES"},
     }
+}
+
+# --- DRF + JWT ---
+REST_FRAMEWORK = {
+    "DEFAULT_AUTHENTICATION_CLASSES": [
+        "rest_framework.authentication.SessionAuthentication",   # UI de DRF / cookies
+        "rest_framework.authentication.BasicAuthentication",
+        "rest_framework_simplejwt.authentication.JWTAuthentication",  # JWT para front/app
+    ],
+    "DEFAULT_PERMISSION_CLASSES": [
+        "rest_framework.permissions.IsAuthenticated",  # por defecto, todo protegido
+    ],
+    "DEFAULT_PAGINATION_CLASS": "rest_framework.pagination.PageNumberPagination",
+    "PAGE_SIZE": 20,
+}
+
+# Opcional: tiempos del token (ajústalos a tu gusto)
+from datetime import timedelta
+SIMPLE_JWT = {
+    "ACCESS_TOKEN_LIFETIME": timedelta(minutes=60),
+    "REFRESH_TOKEN_LIFETIME": timedelta(days=7),
+    "AUTH_HEADER_TYPES": ("Bearer",),
 }
 
 LANGUAGE_CODE = "es-mx"
