@@ -1,0 +1,10 @@
+{% extends "base.html" %}
+{% block content %}
+  <h1>Panel del Dentista</h1>
+  <p>Resumen de citas del día, pacientes y pagos.</p>
+  <ul>
+    <li><a href="{% url 'appointments:list' %}">Citas</a></li>
+    <li><a href="{% url 'patients:list' %}">Pacientes</a></li>
+    <li><a href="{% url 'payments:list' %}">Pagos</a></li>
+  </ul>
+{% endblock %}

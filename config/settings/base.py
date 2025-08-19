@@ -1,16 +1,16 @@
 from pathlib import Path
 import os
 
-BASE_DIR = Path(__file__).resolve().parent.parent.parent  # raíz del repo: dentista-core
+BASE_DIR = Path(__file__).resolve().parents[2]
 
-# ── seguridad / debug (si ya lo tienes con dotenv, respétalo)
-SECRET_KEY = os.getenv("DJANGO_SECRET_KEY", "dev-key")
-DEBUG = os.getenv("DJANGO_DEBUG", "True") == "True"
-AUTH_USER_MODEL = "accounts.User"
+SECRET_KEY = os.getenv("DJANGO_SECRET_KEY", "dev-only-change-in-prod")
 
-ALLOWED_HOSTS = [h.strip() for h in os.getenv("ALLOWED_HOSTS", "127.0.0.1,localhost").split(",")]
+DEBUG = False  # En dev.py lo forzamos a True
+DEBUG = os.getenv("DJANGO_DEBUG", "0") == "1"
+ALLOWED_HOSTS = []
 
 INSTALLED_APPS = [
+    # Django core
     "django.contrib.admin",
     "django.contrib.auth",
     "django.contrib.contenttypes",
@@ -18,21 +18,16 @@ INSTALLED_APPS = [
     "django.contrib.messages",
     "django.contrib.staticfiles",
 
-    # terceros
-    "rest_framework",
-    "corsheaders",
-
-    # apps propias
+    # Apps del proyecto
     "apps.accounts",
     "apps.patients",
     "apps.appointments",
-    "apps.services",
-    "apps.payments",      # ← NUEVA
-    # "apps._archive.legacy",  # ← ARCHIVADA: NO la incluyas
+    "apps.payments",
+    "apps.treatments.apps.TreatmentsConfig",  # antes: apps.services (única entrada)
+    "apps.portal",
 ]
 
 MIDDLEWARE = [
-    "corsheaders.middleware.CorsMiddleware",
     "django.middleware.security.SecurityMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",
@@ -44,74 +39,41 @@ MIDDLEWARE = [
 
 ROOT_URLCONF = "config.urls"
 
-TEMPLATES = [{
-    "BACKEND": "django.template.backends.django.DjangoTemplates",
-    "DIRS": [BASE_DIR / "templates"],   # ← carpeta global de templates
-    "APP_DIRS": True,
-    "OPTIONS": {
-        "context_processors": [
-            "django.template.context_processors.debug",
-            "django.template.context_processors.request",
-            "django.contrib.auth.context_processors.auth",
-            "django.contrib.messages.context_processors.messages",
-        ],
+TEMPLATES = [
+    {
+        "BACKEND": "django.template.backends.django.DjangoTemplates",
+        "DIRS": [BASE_DIR / "templates"],
+        "APP_DIRS": True,
+        "OPTIONS": {
+            "context_processors": [
+                "django.template.context_processors.debug",
+                "django.template.context_processors.request",
+                "django.contrib.auth.context_processors.auth",
+                "django.contrib.messages.context_processors.messages",
+            ],
+        },
     },
-}]
+]
 
 WSGI_APPLICATION = "config.wsgi.application"
+ASGI_APPLICATION = "config.asgi.application"
 
-# BD: (en el siguiente paso levantamos MySQL y .env)
-DATABASES = {
-    "default": {
-        "ENGINE": "django.db.backends.mysql",
-        "NAME": os.getenv("DB_NAME", "dentista"),
-        "USER": os.getenv("DB_USER", "dentyx"),
-        "PASSWORD": os.getenv("DB_PASSWORD", "devpass"),
-        "HOST": os.getenv("DB_HOST", "127.0.0.1"),
-        "PORT": os.getenv("DB_PORT", "3306"),
-        "OPTIONS": {"sql_mode": "STRICT_ALL_TABLES"},
-    }
-}
-
-# --- DRF + JWT ---
-REST_FRAMEWORK = {
-    "DEFAULT_AUTHENTICATION_CLASSES": [
-        "rest_framework.authentication.SessionAuthentication",   # UI de DRF / cookies
-        "rest_framework.authentication.BasicAuthentication",
-        "rest_framework_simplejwt.authentication.JWTAuthentication",  # JWT para front/app
-    ],
-    "DEFAULT_PERMISSION_CLASSES": [
-        "rest_framework.permissions.IsAuthenticated",  # por defecto, todo protegido
-    ],
-    "DEFAULT_PAGINATION_CLASS": "rest_framework.pagination.PageNumberPagination",
-    "PAGE_SIZE": 20,
-}
-
-# Opcional: tiempos del token (ajústalos a tu gusto)
-from datetime import timedelta
-SIMPLE_JWT = {
-    "ACCESS_TOKEN_LIFETIME": timedelta(minutes=60),
-    "REFRESH_TOKEN_LIFETIME": timedelta(days=7),
-    "AUTH_HEADER_TYPES": ("Bearer",),
-}
+# ⬇️ Ajusta según tu modelo real:
+AUTH_USER_MODEL = "accounts.User"  # Si tu clase es CustomUser => "accounts.CustomUser"
 
 LANGUAGE_CODE = "es-mx"
 TIME_ZONE = "America/Mexico_City"
 USE_I18N = True
 USE_TZ = True
 
-# Static / Media
 STATIC_URL = "static/"
-STATIC_ROOT = BASE_DIR / "staticfiles"
 STATICFILES_DIRS = [BASE_DIR / "static"]
+STATIC_ROOT = BASE_DIR / "staticfiles"
 
 MEDIA_URL = "media/"
 MEDIA_ROOT = BASE_DIR / "media"
 
-DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
+LOGIN_URL = "accounts:login"
+LOGIN_REDIRECT_URL = "portal:patient_home"
 
-# CORS (para frontend local si lo usas)
-CORS_ALLOWED_ORIGINS = [
-    "http://127.0.0.1:5173",
-    "http://localhost:5173",
-]
+DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"

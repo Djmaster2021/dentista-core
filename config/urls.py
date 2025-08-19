@@ -1,31 +1,22 @@
 from django.contrib import admin
 from django.urls import path, include
-from django.conf import settings
-from django.conf.urls.static import static
-
-# JWT
-from rest_framework_simplejwt.views import (
-    TokenObtainPairView,
-    TokenRefreshView,
-)
+from django.views.generic import RedirectView
+from django.templatetags.static import static
 
 urlpatterns = [
     path("admin/", admin.site.urls),
 
-    # Login/Logout de la UI de DRF (sesiones, muy útil para probar en el navegador)
-    path("api-auth/", include("rest_framework.urls")),
+    # Portal (home, paciente, dentista)
+    path("", include(("apps.portal.urls", "portal"), namespace="portal")),
 
-    # JWT endpoints (para tu front/app)
-    path("api/token/", TokenObtainPairView.as_view(), name="token_obtain_pair"),
-    path("api/token/refresh/", TokenRefreshView.as_view(), name="token_refresh"),
+    # Auth
+    path("accounts/", include(("apps.accounts.urls", "accounts"), namespace="accounts")),
 
-    # Rutas de tus apps
-    path("", include("apps.accounts.urls")),
-    path("", include("apps.patients.urls")),
-    path("", include("apps.appointments.urls")),
-    path("", include("apps.services.urls")),
-    # path("", include("apps.payments.urls")),  # cuando lo tengamos
+    # APIs (v1)
+    path("api/v1/appointments/", include("apps.appointments.api.urls")),
+    path("api/v1/patients/", include("apps.patients.api.urls")),
+    path("api/v1/payments/", include("apps.payments.api.urls")),
+    path("favicon.ico", RedirectView.as_view(url=static("favicon.ico"), permanent=True)),
+    # Catálogo de tratamientos (no-API, vistas server-side)
+    path("treatments/", include(("apps.treatments.urls", "treatments"), namespace="treatments")),
 ]
-
-if settings.DEBUG:
-    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
