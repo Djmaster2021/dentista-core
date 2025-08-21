@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+{% block content %}
+<h2>Citas</h2>
+<p><a href="{% url 'dentist:appointment_create' %}">+ Nueva cita</a></p>
+<table border="1" cellpadding="6">
+<tr><th>Fecha</th><th>Hora</th><th>Paciente</th><th>Servicio</th><th>Estatus</th><th>$</th><th></th></tr>
+{% for ap in items %}
+<tr>
+  <td>{{ ap.date }}</td><td>{{ ap.time }}</td>
+  <td>{{ ap.patient.full_name }}</td><td>{{ ap.service.name }}</td>
+  <td>{{ ap.get_status_display }}</td>
+  <td>{% if ap.payment %}{{ ap.payment.amount_mxn }}{% else %}-{% endif %}</td>
+  <td><a href="{% url 'dentist:appointment_detail' ap.pk %}">ver</a></td>
+</tr>
+{% empty %}<tr><td colspan="7">Sin registros</td></tr>{% endfor %}
+</table>
+{% endblock %}

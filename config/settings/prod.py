@@ -1,20 +1,20 @@
 from .base import *
+import dj_database_url
 import os
 
-# Activa DEBUG solo con variable (para diagnosticar)
-DEBUG = os.getenv("DJANGO_DEBUG", "0") == "1"
+DEBUG = os.getenv("DEBUG", "False") == "True"
+ALLOWED_HOSTS = os.getenv("ALLOWED_HOSTS", "").split(",") if os.getenv("ALLOWED_HOSTS") else []
 
-# Hosts para tus pruebas locales/LAN
-ALLOWED_HOSTS = ["0.0.0.0", "127.0.0.1", "localhost"]
-CSRF_TRUSTED_ORIGINS = ["http://0.0.0.0:8001", "http://127.0.0.1:8001"]
+SECRET_KEY = os.getenv("SECRET_KEY")
 
-# ➜ NO reemplaces toda la lista; solo la extendemos con WhiteNoise al principio
-BASE_MIDDLEWARE = MIDDLEWARE  # viene de base.py
-MIDDLEWARE = [
-    "django.middleware.security.SecurityMiddleware",
-    "whitenoise.middleware.WhiteNoiseMiddleware",
-    *BASE_MIDDLEWARE,  # aquí ya están Session, Auth, Messages en el orden correcto
-]
+DATABASES = {
+    "default": dj_database_url.parse(os.getenv("DATABASE_URL", ""), conn_max_age=600, ssl_require=False)
+}
 
-# WhiteNoise para estáticos en DEBUG=False
-STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
+# Seguridad típica prod (ajusta según tu entorno)
+SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
+SESSION_COOKIE_SECURE = True
+CSRF_COOKIE_SECURE = True
+SECURE_BROWSER_XSS_FILTER = True
+SECURE_CONTENT_TYPE_NOSNIFF = True
+X_FRAME_OPTIONS = "DENY"

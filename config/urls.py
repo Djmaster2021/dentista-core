@@ -1,22 +1,28 @@
+# config/urls.py
 from django.contrib import admin
 from django.urls import path, include
-from django.views.generic import RedirectView
-from django.templatetags.static import static
+from apps.accounts.views import DentistLoginView, root_redirect
+from apps.accounts import urls as accounts_urls
 
 urlpatterns = [
+    # 👇 raíz: si está logueado -> /dashboard/, si no -> /login/
+    path("", root_redirect, name="root"),
+
+    # Admin usando tu login
+    path("admin/login/", DentistLoginView.as_view(), name="admin_login"),
     path("admin/", admin.site.urls),
 
-    # Portal (home, paciente, dentista)
-    path("", include(("apps.portal.urls", "portal"), namespace="portal")),
+    # WEB (login, logout, register, reset...) con namespace "accounts"
+    path("", include((accounts_urls.webpatterns, "accounts"), namespace="accounts")),
 
-    # Auth
-    path("accounts/", include(("apps.accounts.urls", "accounts"), namespace="accounts")),
+    # API JWT debajo de /api/accounts/ con su propio namespace
+    path(
+        "api/accounts/",
+        include((accounts_urls.apipatterns, "accounts_api"), namespace="accounts_api"),
+    ),
 
-    # APIs (v1)
-    path("api/v1/appointments/", include("apps.appointments.api.urls")),
-    path("api/v1/patients/", include("apps.patients.api.urls")),
-    path("api/v1/payments/", include("apps.payments.api.urls")),
-    path("favicon.ico", RedirectView.as_view(url=static("favicon.ico"), permanent=True)),
-    # Catálogo de tratamientos (no-API, vistas server-side)
-    path("treatments/", include(("apps.treatments.urls", "treatments"), namespace="treatments")),
+    # Otras APIs si aplica:
+    # path("api/patients/", include("apps.patients.urls")),
+    # path("api/services/", include("apps.services.urls")),
+    # path("api/appointments/", include("apps.appointments.urls")),
 ]

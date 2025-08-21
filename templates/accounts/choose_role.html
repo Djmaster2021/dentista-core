@@ -1,0 +1,11 @@
+{% extends "accounts/simple_base.html" %}
+{% block title %}Elige tu rol · Dentyx{% endblock %}
+{% block content %}
+  <h2>¿Cómo quieres entrar?</h2>
+  <p>Selecciona tu módulo:</p>
+  <div style="display:flex; gap:12px; margin-top:12px;">
+    <a href="{% url 'dentist:appointment_list' %}" style="padding:10px 14px;border:1px solid #ccc;border-radius:8px;text-decoration:none;">Módulo Dentista</a>
+    <!-- Si ya tienes portal de paciente, ajusta la URL; si no, deja solo el del dentista -->
+    <a href="/" style="padding:10px 14px;border:1px solid #ccc;border-radius:8px;text-decoration:none;">Inicio</a>
+  </div>
+{% endblock %}

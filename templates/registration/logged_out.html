@@ -1,0 +1,8 @@
+{% extends 'base.html' %}
+{% block title %}Sesión cerrada{% endblock %}
+{% block content %}
+<section class="auth-card">
+  <h1 class="auth-title">Has salido de tu cuenta</h1>
+  <p><a href="{% url 'accounts:choose_role' %}">Volver a entrar</a></p>
+</section>
+{% endblock %}

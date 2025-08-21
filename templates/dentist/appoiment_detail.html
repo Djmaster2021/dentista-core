@@ -1,0 +1,13 @@
+{% extends "base.html" %}
+{% block content %}
+<h1>Detalle de cita #{{ appointment.id }}</h1>
+<ul>
+  <li><strong>Fecha:</strong> {{ appointment.date }}</li>
+  <li><strong>Hora:</strong> {{ appointment.time }}</li>
+  <li><strong>Paciente:</strong> {{ appointment.patient }}</li>
+  <li><strong>Servicio:</strong> {{ appointment.service }}</li>
+  <li><strong>Estado:</strong> {{ appointment.status }}</li>
+  <li><strong>Notas:</strong> {{ appointment.notes }}</li>
+</ul>
+<p><a href="{% url 'dentist:appointments_today' %}">← Volver</a></p>
+{% endblock %}
