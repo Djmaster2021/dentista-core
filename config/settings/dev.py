@@ -29,7 +29,9 @@ ALLOWED_HOSTS = ["*"]
 
 # Email en consola (para ver el enlace de reset en el terminal)
 EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
-DEFAULT_FROM_EMAIL = "no-reply@dentista.local"
+DEFAULT_FROM_EMAIL = "Dentyx <no-reply@dentyx.local>"
+
+LOGOUT_REDIRECT_URL = "login"  # o "/" o "dashboard"
 
 # (Opcional) CORS extra en dev
 CORS_ALLOWED_ORIGINS = [

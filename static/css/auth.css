@@ -3,9 +3,10 @@
     min-height:100vh;
     background:
       linear-gradient(180deg, rgba(0,0,0,.4), rgba(0,0,0,.7)),
-      url("/static/img/forest.jpg") center/cover no-repeat fixed;
+      url("/static/img/password_reset_done.jpg") center/cover no-repeat fixed;
     display:grid;place-items:center;padding:24px;
   }
+  
   
   .auth-card{
     width:min(540px, 100%);
@@ -23,5 +24,3 @@
     background:#0c1426;border:1px solid var(--border);
     display:grid;place-items:center;color:#fff;text-decoration:none;
   }
-  .auth-ico:hover{border-color:var(--brand)}
-  

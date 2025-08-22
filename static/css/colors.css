@@ -1,0 +1,28 @@
+:root {
+    --dentyx-primary: #011C40;
+    --dentyx-secondary: #023859;
+    --dentyx-accent: #26658C;
+    --dentyx-light: #A7EBF2;
+    --dentyx-medium: #54ACBF;
+  }
+  
+  .bg-dentyx-primary {
+    background-color: var(--dentyx-primary) !important;
+    color: white !important;
+  }
+  
+  .bg-dentyx-secondary {
+    background-color: var(--dentyx-secondary) !important;
+    color: white !important;
+  }
+  
+  .text-dentyx-primary {
+    color: var(--dentyx-primary) !important;
+  }
+  
+  .btn-dentyx {
+    background-color: var(--dentyx-accent) !important;
+    border-color: var(--dentyx-accent) !important;
+    color: white !important;
+  }
+  

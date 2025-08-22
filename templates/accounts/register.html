@@ -1,19 +1,54 @@
-<!doctype html>
-<html lang="es">
-<head><meta charset="utf-8"><title>Registro</title></head>
-<body>
-  <h1>Registro de dentista</h1>
-  <form method="post">
+{% extends "base_auth.html" %}
+{% load static %}
+
+{% block title %}Registrar dentista{% endblock %}
+
+{% block card_header %}
+  <h1 class="auth-title">Registrar dentista</h1>
+  <p class="auth-subtitle">Crea tu cuenta para administrar agenda, pacientes y pagos.</p>
+{% endblock %}
+
+{% block content %}
+  <form method="post" action="{% url 'accounts:register' %}" novalidate>
     {% csrf_token %}
     {{ form.non_field_errors }}
-    <p>{{ form.username.label_tag }} {{ form.username }}</p>
-    <p>{{ form.email.label_tag }} {{ form.email }}</p>
-    <p>{{ form.first_name.label_tag }} {{ form.first_name }}</p>
-    <p>{{ form.last_name.label_tag }} {{ form.last_name }}</p>
-    <p>{{ form.password1.label_tag }} {{ form.password1 }}</p>
-    <p>{{ form.password2.label_tag }} {{ form.password2 }}</p>
-    <button type="submit">Crear cuenta</button>
+
+    <div class="mb-3">
+      <label class="form-label" for="{{ form.first_name.id_for_label }}">Nombre</label>
+      {{ form.first_name }}
+      {{ form.first_name.errors }}
+    </div>
+
+    <div class="mb-3">
+      <label class="form-label" for="{{ form.last_name.id_for_label }}">Apellidos</label>
+      {{ form.last_name }}
+      {{ form.last_name.errors }}
+    </div>
+
+    <div class="mb-3">
+      <label class="form-label" for="{{ form.email.id_for_label }}">Correo</label>
+      {{ form.email }}
+      {{ form.email.errors }}
+    </div>
+
+    <div class="mb-3">
+      <label class="form-label" for="{{ form.password1.id_for_label }}">Contraseña</label>
+      {{ form.password1 }}
+      {{ form.password1.errors }}
+    </div>
+
+    <div class="mb-3">
+      <label class="form-label" for="{{ form.password2.id_for_label }}">Confirmar contraseña</label>
+      {{ form.password2 }}
+      {{ form.password2.errors }}
+    </div>
+
+    <button type="submit" class="btn btn-primary w-100">Crear cuenta</button>
   </form>
-  <p><a href="{% url 'accounts:login' %}">Volver a iniciar sesión</a></p>
-</body>
-</html>
+{% endblock %}
+
+{% block card_footer %}
+  <div class="auth-links" style="margin-top:12px">
+    <a href="{% url 'accounts:login' %}" class="btn">← Regresar al login</a>
+  </div>
+{% endblock %}

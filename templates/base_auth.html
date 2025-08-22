@@ -1,0 +1,27 @@
+{% load static %}
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>{% block title %}Dentyx{% endblock %}</title>
+
+  <!-- Hojas reales en tu repo -->
+  <link rel="stylesheet" href="{% static 'css/base.css' %}">
+  <link rel="stylesheet" href="{% static 'css/auth.css' %}">
+  {% block extra_css %}{% endblock %}
+</head>
+<body class="auth-wrap">
+  <main class="auth-card">
+    {% block card_header %}{% endblock %}
+
+    <div class="auth-card-body">
+      {% block content %}{% endblock %}
+    </div>
+
+    {% block card_footer %}{% endblock %}
+  </main>
+
+  {% block extra_js %}{% endblock %}
+</body>
+</html>
