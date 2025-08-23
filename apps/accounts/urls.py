@@ -64,5 +64,7 @@ urlpatterns = webpatterns + apipatterns
 
 urlpatterns = [
     path("accounts/", include("allauth.urls")),  # <-- rutas de allauth
-    ...
+]
+urlpatterns = [
+    path("oauth/", include("social_django.urls", namespace="social")),
 ]

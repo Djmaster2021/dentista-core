@@ -2,7 +2,6 @@
 from pathlib import Path
 from datetime import timedelta
 import os
-
 from dotenv import load_dotenv
 
 # -------------------------------------------------------------------
@@ -14,15 +13,14 @@ load_dotenv(BASE_DIR / ".env")
 # -------------------------------------------------------------------
 # Core
 # -------------------------------------------------------------------
-SECRET_KEY = os.getenv("SECRET_KEY", "dev-insecure-key")  # override en prod
+SECRET_KEY = os.getenv("SECRET_KEY", "dev-insecure-key")
 DEBUG = os.getenv("DEBUG", "False").lower() == "true"
-
 ALLOWED_HOSTS = [h.strip() for h in os.getenv("ALLOWED_HOSTS", "").split(",") if h.strip()]
 
 SITE_ID = 1
 
 # -------------------------------------------------------------------
-# Tema (opcional)
+# Tema (opcional, para context processor)
 # -------------------------------------------------------------------
 THEME = {
     "PRIMARY":   "#163832",
@@ -46,18 +44,20 @@ INSTALLED_APPS = [
     "django.contrib.sites",
 
     # 3rd party
+    "widget_tweaks",
     "rest_framework",
     "drf_spectacular",
     "corsheaders",
+    "whitenoise.runserver_nostatic",  # evita servir estáticos duplicado en dev
 
-    # Auth social (allauth)
+    # Autenticación social (allauth)
     "allauth",
     "allauth.account",
     "allauth.socialaccount",
     "allauth.socialaccount.providers.google",
     "allauth.socialaccount.providers.facebook",
 
-    # Local apps
+    # Apps locales
     "apps.accounts",
     "apps.patients",
     "apps.services",
@@ -66,17 +66,21 @@ INSTALLED_APPS = [
 ]
 
 # -------------------------------------------------------------------
-# Middleware (AccountMiddleware DEBE ir después de AuthenticationMiddleware)
+# Middleware
 # -------------------------------------------------------------------
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
     "whitenoise.middleware.WhiteNoiseMiddleware",
+
     "django.contrib.sessions.middleware.SessionMiddleware",
     "corsheaders.middleware.CorsMiddleware",
+
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
+
     "django.contrib.auth.middleware.AuthenticationMiddleware",
-    "allauth.account.middleware.AccountMiddleware",   # <-- requerido por allauth
+    "allauth.account.middleware.AccountMiddleware",  # requerido por allauth
+
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
 ]
@@ -94,7 +98,7 @@ TEMPLATES = [
         "OPTIONS": {
             "context_processors": [
                 "django.template.context_processors.debug",
-                "django.template.context_processors.request",  # <-- necesario para allauth
+                "django.template.context_processors.request",  # necesario para allauth
                 "django.contrib.auth.context_processors.auth",
                 "django.contrib.messages.context_processors.messages",
                 "config.context_processors.theme",
@@ -104,28 +108,28 @@ TEMPLATES = [
 ]
 
 # -------------------------------------------------------------------
-# Auth (modelo, backends, allauth)
+# Auth
 # -------------------------------------------------------------------
-AUTH_USER_MODEL = "accounts.User"  # etiqueta de app 'accounts' (app label)
+AUTH_USER_MODEL = "accounts.User"
 
 AUTHENTICATION_BACKENDS = [
-    "apps.accounts.backends.EmailOrUsernameBackend",       # tu backend (username/email)
-    "django.contrib.auth.backends.ModelBackend",           # respaldo
-    "allauth.account.auth_backends.AuthenticationBackend", # requerido por allauth
+    "apps.accounts.backends.EmailOrUsernameBackend",  # login por email o usuario
+    "django.contrib.auth.backends.ModelBackend",      # respaldo
+    "allauth.account.auth_backends.AuthenticationBackend",
 ]
 
+# Rutas de login/logout
 LOGIN_URL = "/login/"
-LOGIN_REDIRECT_URL = "/"          # a tu dashboard cuando esté
+LOGIN_REDIRECT_URL = "/"
 LOGOUT_REDIRECT_URL = "/login/"
 
-# Nuevas claves (evita deprecations)
-ACCOUNT_LOGIN_METHODS = {"email"}                         # o {"email","username"}
-ACCOUNT_SIGNUP_FIELDS = ["email*", "password1*", "password2*"]
-ACCOUNT_USERNAME_GENERATOR = None
-ACCOUNT_EMAIL_VERIFICATION = "optional"                   # "mandatory" si quieres forzar verificación
-# (si usas login por email únicamente, no necesitas username en formularios)
+# Allauth (ajustes básicos)
+# Si usas solo email para login:
+# ACCOUNT_AUTHENTICATION_METHOD = "email"
+# ACCOUNT_USERNAME_REQUIRED = False
+ACCOUNT_EMAIL_VERIFICATION = "optional"  # "mandatory" si quieres forzar verificación
+ACCOUNT_EMAIL_REQUIRED = True
 
-# Proveedores sociales (credenciales desde .env)
 SOCIALACCOUNT_PROVIDERS = {
     "google": {
         "APP": {
@@ -149,7 +153,7 @@ SOCIALACCOUNT_PROVIDERS = {
 }
 
 # -------------------------------------------------------------------
-# Base de datos (base: sqlite; override en dev/prod para MySQL)
+# Base de datos (por defecto sqlite; en dev/prod sobreescribe a MySQL)
 # -------------------------------------------------------------------
 DATABASES = {
     "default": {
@@ -157,7 +161,7 @@ DATABASES = {
         "NAME": BASE_DIR / "db.sqlite3",
     }
 }
-# Si quieres usar MySQL aquí mismo (opcional):
+# Para MySQL (normalmente en config/settings/dev.py o prod.py)
 # DATABASES = {
 #     "default": {
 #         "ENGINE": "django.db.backends.mysql",
@@ -171,7 +175,7 @@ DATABASES = {
 # }
 
 # -------------------------------------------------------------------
-# Passwords y auth
+# Password validators
 # -------------------------------------------------------------------
 AUTH_PASSWORD_VALIDATORS = [
     {"NAME": "django.contrib.auth.password_validation.UserAttributeSimilarityValidator"},
@@ -194,6 +198,15 @@ USE_TZ = True
 STATIC_URL = "/static/"
 STATIC_ROOT = BASE_DIR / "staticfiles"
 STATICFILES_DIRS = [BASE_DIR / "static"] if (BASE_DIR / "static").exists() else []
+
+# WhiteNoise (manifiesto y compresión para no-DEBUG)
+if not DEBUG:
+    STORAGES = {
+        "staticfiles": {
+            "BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage",
+        }
+    }
+
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 # -------------------------------------------------------------------
